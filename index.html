@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT LaunchPad — Your Gateway to an IT Career</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <span class="logo-icon">&#9889;</span> IT LaunchPad
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#career-paths">Career Paths</a></li>
+                <li><a href="#learning-hub">Learning Hub</a></li>
+                <li><a href="#real-world">Real-World Skills</a></li>
+                <li><a href="#get-hired">Get Hired</a></li>
+                <li><a href="#certifications">Certifications</a></li>
+                <li><a href="#community">Community</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero" id="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <span class="hero-badge">100% Free Resources</span>
+                <h1>Launch Your <span class="highlight">IT Career</span> With Confidence</h1>
+                <p class="hero-description">
+                    Everything you need to break into IT — career roadmaps, hands-on labs,
+                    real-world scenarios, and job-hunting tools. All free. All in one place.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#career-paths" class="btn btn-primary">Explore Career Paths</a>
+                    <a href="#learning-hub" class="btn btn-secondary">Start Learning</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">7+</span>
+                        <span class="stat-label">Career Paths</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Free Resources</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Hands-On</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image-wrapper">
+                    <img src="Photo on 12-5-2026 at 12.14.jpg" alt="IT LaunchPad Founder" class="hero-image">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Career Paths Section -->
+    <section class="section career-paths" id="career-paths">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Choose Your Path</span>
+                <h2>Entry-Level IT Career Paths</h2>
+                <p>Each path shows you exactly what skills to learn, what tools to master, and where to find free training.</p>
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All Paths</button>
+                <button class="filter-btn" data-filter="support">Support</button>
+                <button class="filter-btn" data-filter="development">Development</button>
+                <button class="filter-btn" data-filter="infrastructure">Infrastructure</button>
+                <button class="filter-btn" data-filter="data">Data & Security</button>
+            </div>
+
+            <div class="career-grid">
+                <!-- IT Support -->
+                <div class="career-card" data-category="support">
+                    <div class="career-icon">&#128187;</div>
+                    <h3>Help Desk / IT Support</h3>
+                    <p>The most common entry point into IT. Troubleshoot hardware, software, and network issues for end users.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">Troubleshooting</span>
+                        <span class="skill-tag">Windows/Mac OS</span>
+                        <span class="skill-tag">Active Directory</span>
+                        <span class="skill-tag">Networking Basics</span>
+                        <span class="skill-tag">Ticketing Systems</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> ServiceNow, Jira, Active Directory, Remote Desktop
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $35,000 - $50,000
+                    </div>
+                </div>
+
+                <!-- Junior Developer -->
+                <div class="career-card" data-category="development">
+                    <div class="career-icon">&#128104;&#8205;&#128187;</div>
+                    <h3>Junior Software Developer</h3>
+                    <p>Write code, fix bugs, and build features. Choose from web, mobile, or backend development.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">HTML/CSS/JavaScript</span>
+                        <span class="skill-tag">Python or Java</span>
+                        <span class="skill-tag">Git & GitHub</span>
+                        <span class="skill-tag">Databases (SQL)</span>
+                        <span class="skill-tag">APIs</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> VS Code, GitHub, Terminal/CLI, Postman
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $50,000 - $75,000
+                    </div>
+                </div>
+
+                <!-- QA Engineer -->
+                <div class="career-card" data-category="development">
+                    <div class="career-icon">&#128270;</div>
+                    <h3>QA / Test Engineer</h3>
+                    <p>Ensure software quality by writing test cases, automating tests, and finding bugs before users do.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">Test Case Writing</span>
+                        <span class="skill-tag">Manual Testing</span>
+                        <span class="skill-tag">Automation Basics</span>
+                        <span class="skill-tag">Bug Reporting</span>
+                        <span class="skill-tag">Agile/Scrum</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> Selenium, Postman, JIRA, TestRail
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $45,000 - $65,000
+                    </div>
+                </div>
+
+                <!-- Cloud/DevOps -->
+                <div class="career-card" data-category="infrastructure">
+                    <div class="career-icon">&#9729;&#65039;</div>
+                    <h3>Cloud / DevOps Junior</h3>
+                    <p>Work with cloud platforms, automate deployments, and manage infrastructure as code.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">Linux</span>
+                        <span class="skill-tag">AWS / Azure Basics</span>
+                        <span class="skill-tag">Docker</span>
+                        <span class="skill-tag">CI/CD Pipelines</span>
+                        <span class="skill-tag">Scripting (Bash/Python)</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> AWS Free Tier, Docker, GitHub Actions, Terraform
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $55,000 - $80,000
+                    </div>
+                </div>
+
+                <!-- Network Technician -->
+                <div class="career-card" data-category="infrastructure">
+                    <div class="career-icon">&#127760;</div>
+                    <h3>Network Technician</h3>
+                    <p>Install, configure, and maintain network infrastructure — routers, switches, firewalls, and Wi-Fi.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">TCP/IP</span>
+                        <span class="skill-tag">Subnetting</span>
+                        <span class="skill-tag">Routing & Switching</span>
+                        <span class="skill-tag">Firewalls</span>
+                        <span class="skill-tag">Wireless Networks</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> Cisco Packet Tracer, Wireshark, GNS3, PuTTY
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $40,000 - $55,000
+                    </div>
+                </div>
+
+                <!-- Data Analyst -->
+                <div class="career-card" data-category="data">
+                    <div class="career-icon">&#128202;</div>
+                    <h3>Data Analyst</h3>
+                    <p>Turn raw data into insights. Create dashboards, write queries, and help businesses make data-driven decisions.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">SQL</span>
+                        <span class="skill-tag">Excel / Google Sheets</span>
+                        <span class="skill-tag">Data Visualization</span>
+                        <span class="skill-tag">Python (Pandas)</span>
+                        <span class="skill-tag">Statistics Basics</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> Power BI, Tableau Public, Google Sheets, Jupyter Notebooks
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $45,000 - $65,000
+                    </div>
+                </div>
+
+                <!-- Cybersecurity -->
+                <div class="career-card" data-category="data">
+                    <div class="career-icon">&#128274;</div>
+                    <h3>Cybersecurity Analyst</h3>
+                    <p>Protect organizations from cyber threats. Monitor alerts, respond to incidents, and enforce security policies.</p>
+                    <div class="skills-list">
+                        <span class="skill-tag">Security Fundamentals</span>
+                        <span class="skill-tag">Networking</span>
+                        <span class="skill-tag">SIEM Tools</span>
+                        <span class="skill-tag">Incident Response</span>
+                        <span class="skill-tag">Linux</span>
+                    </div>
+                    <div class="career-tools">
+                        <strong>Tools to Learn:</strong> Wireshark, Splunk, TryHackMe, Nmap
+                    </div>
+                    <div class="career-salary">
+                        <strong>Typical Starting Salary:</strong> $50,000 - $70,000
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Hub Section -->
+    <section class="section learning-hub" id="learning-hub">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Free Resources</span>
+                <h2>Hands-On Learning Hub</h2>
+                <p>Every resource here is free and focuses on practical, hands-on experience — not just theory.</p>
+            </div>
+
+            <div class="learning-categories">
+                <!-- Programming & Web Dev -->
+                <div class="learning-category">
+                    <div class="category-header">
+                        <span class="category-icon">&#128187;</span>
+                        <h3>Programming & Web Development</h3>
+                    </div>
+                    <div class="resource-list">
+                        <a href="https://www.freecodecamp.org" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>freeCodeCamp</h4>
+                                <p>Full-stack web development with projects and free certifications. Covers HTML, CSS, JS, React, Node, Python, and more.</p>
+                            </div>
+                            <span class="resource-type">Interactive</span>
+                        </a>
+                        <a href="https://www.theodinproject.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>The Odin Project</h4>
+                                <p>Project-based full-stack curriculum. Build real projects from day one — no hand-holding, real developer workflow.</p>
+                            </div>
+                            <span class="resource-type">Project-Based</span>
+                        </a>
+                        <a href="https://cs50.harvard.edu/x/" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Harvard CS50 (edX)</h4>
+                                <p>World-class intro to computer science. Covers C, Python, SQL, web dev, and algorithms. Free to audit.</p>
+                            </div>
+                            <span class="resource-type">Course</span>
+                        </a>
+                        <a href="https://www.codecademy.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Codecademy (Free Tier)</h4>
+                                <p>Interactive coding lessons in Python, JavaScript, SQL, and more. Great for absolute beginners.</p>
+                            </div>
+                            <span class="resource-type">Interactive</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cloud & Infrastructure -->
+                <div class="learning-category">
+                    <div class="category-header">
+                        <span class="category-icon">&#9729;&#65039;</span>
+                        <h3>Cloud & Infrastructure</h3>
+                    </div>
+                    <div class="resource-list">
+                        <a href="https://explore.skillbuilder.aws/learn" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>AWS Skill Builder</h4>
+                                <p>Free cloud training from Amazon. Covers AWS fundamentals, architecture, and hands-on labs with free tier.</p>
+                            </div>
+                            <span class="resource-type">Labs</span>
+                        </a>
+                        <a href="https://learn.microsoft.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Microsoft Learn</h4>
+                                <p>Free Azure, Microsoft 365, and Power Platform training with interactive sandboxes and learning paths.</p>
+                            </div>
+                            <span class="resource-type">Interactive</span>
+                        </a>
+                        <a href="https://www.cloudskillsboost.google/catalog?format%5B%5D=courses&free_tier=on" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Google Cloud Skills Boost (Free Courses)</h4>
+                                <p>Google Cloud free-tier courses covering cloud fundamentals, networking, and security. No credit card required.</p>
+                            </div>
+                            <span class="resource-type">Free Courses</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cybersecurity -->
+                <div class="learning-category">
+                    <div class="category-header">
+                        <span class="category-icon">&#128274;</span>
+                        <h3>Cybersecurity</h3>
+                    </div>
+                    <div class="resource-list">
+                        <a href="https://tryhackme.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>TryHackMe</h4>
+                                <p>Gamified cybersecurity training with guided rooms. Learn hacking and defense in a safe, legal environment.</p>
+                            </div>
+                            <span class="resource-type">Labs</span>
+                        </a>
+                        <a href="https://academy.hackthebox.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Hack The Box Academy (Free Tier)</h4>
+                                <p>Structured cybersecurity learning paths with free beginner modules. Hands-on labs and challenges — no payment needed to start.</p>
+                            </div>
+                            <span class="resource-type">Free Labs</span>
+                        </a>
+                        <a href="https://cyberdefenders.org" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>CyberDefenders</h4>
+                                <p>Blue team focused labs. Practice digital forensics, threat hunting, and incident response with real data.</p>
+                            </div>
+                            <span class="resource-type">Challenges</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Networking -->
+                <div class="learning-category">
+                    <div class="category-header">
+                        <span class="category-icon">&#127760;</span>
+                        <h3>Networking & Linux</h3>
+                    </div>
+                    <div class="resource-list">
+                        <a href="https://www.netacad.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Cisco Networking Academy</h4>
+                                <p>Free CCNA-level content and Packet Tracer simulator. The gold standard for networking fundamentals.</p>
+                            </div>
+                            <span class="resource-type">Course + Labs</span>
+                        </a>
+                        <a href="https://linuxjourney.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Linux Journey</h4>
+                                <p>Learn Linux from the ground up — command line, file system, permissions, processes, and networking.</p>
+                            </div>
+                            <span class="resource-type">Interactive</span>
+                        </a>
+                        <a href="https://kodekloud.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>KodeKloud (Free Tier)</h4>
+                                <p>DevOps and cloud hands-on labs. Practice Docker, Kubernetes, Ansible, and more in real environments.</p>
+                            </div>
+                            <span class="resource-type">Labs</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- IT Support Specific -->
+                <div class="learning-category">
+                    <div class="category-header">
+                        <span class="category-icon">&#127891;</span>
+                        <h3>IT Support & Fundamentals</h3>
+                    </div>
+                    <div class="resource-list">
+                        <a href="https://www.coursera.org/professional-certificates/google-it-support" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Google IT Support Certificate (Coursera — Free Audit)</h4>
+                                <p>Google's own IT support training. Covers networking, security, troubleshooting, and system admin. Audit all course content for free — no payment required.</p>
+                            </div>
+                            <span class="resource-type">Free Audit</span>
+                        </a>
+                        <a href="https://www.professormesser.com" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>Professor Messer (YouTube)</h4>
+                                <p>Free CompTIA A+, Network+, and Security+ video courses. The most popular free certification prep resource.</p>
+                            </div>
+                            <span class="resource-type">Video</span>
+                        </a>
+                        <a href="https://github.com/skills" target="_blank" rel="noopener noreferrer" class="resource-item">
+                            <div class="resource-info">
+                                <h4>GitHub Skills</h4>
+                                <p>Learn Git and GitHub workflows through interactive, hands-on exercises directly in your browser.</p>
+                            </div>
+                            <span class="resource-type">Interactive</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-World Skills Section -->
+    <section class="section real-world" id="real-world">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Workplace Ready</span>
+                <h2>Real-World Skills They Don't Teach in School</h2>
+                <p>Learn what a typical workday actually looks like and master the soft skills that set top candidates apart.</p>
+            </div>
+
+            <div class="scenarios-grid">
+                <div class="scenario-card">
+                    <div class="scenario-icon">&#128295;</div>
+                    <h3>Troubleshooting Scenarios</h3>
+                    <p>Walk through real IT problems step by step:</p>
+                    <ul>
+                        <li>"User can't connect to VPN" — how to diagnose and fix</li>
+                        <li>"Printer not working" — the systematic approach</li>
+                        <li>"Laptop is slow" — what to check and in what order</li>
+                        <li>"Password reset" — proper security procedures</li>
+                    </ul>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">&#128172;</div>
+                    <h3>Professional Communication</h3>
+                    <p>Communicate like a pro from day one:</p>
+                    <ul>
+                        <li>How to write a clear ticket/bug report</li>
+                        <li>Email etiquette — templates for common situations</li>
+                        <li>How to ask questions without annoying your team</li>
+                        <li>Slack/Teams best practices</li>
+                    </ul>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">&#128101;</div>
+                    <h3>Working on a Team</h3>
+                    <p>Navigate team dynamics confidently:</p>
+                    <ul>
+                        <li>What happens in a standup meeting</li>
+                        <li>How Agile/Scrum works in practice</li>
+                        <li>When and how to escalate issues</li>
+                        <li>Giving and receiving code reviews</li>
+                    </ul>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">&#128736;&#65039;</div>
+                    <h3>Workplace Tools</h3>
+                    <p>Tools you'll use on day one at any IT job:</p>
+                    <ul>
+                        <li>Ticketing systems (ServiceNow, Jira, Zendesk)</li>
+                        <li>Documentation (Confluence, Notion, SharePoint)</li>
+                        <li>Version control (Git basics for everyone)</li>
+                        <li>Remote access tools (RDP, SSH, VPN clients)</li>
+                    </ul>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">&#128337;</div>
+                    <h3>Time & Task Management</h3>
+                    <p>Stay organized and productive:</p>
+                    <ul>
+                        <li>How to prioritize tickets by severity</li>
+                        <li>Managing multiple tasks without dropping the ball</li>
+                        <li>Documentation habits that save your future self</li>
+                        <li>Learning on the job without falling behind</li>
+                    </ul>
+                </div>
+
+                <div class="scenario-card">
+                    <div class="scenario-icon">&#129504;</div>
+                    <h3>Mindset & Growth</h3>
+                    <p>Build the right mental framework:</p>
+                    <ul>
+                        <li>Imposter syndrome is normal — here's how to manage it</li>
+                        <li>You don't need to know everything on day one</li>
+                        <li>"Google it" is a legitimate professional skill</li>
+                        <li>Building your knowledge base over time</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Get Hired Section -->
+    <section class="section get-hired" id="get-hired">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Land the Job</span>
+                <h2>Get Hired — Your Job Search Toolkit</h2>
+                <p>From resume to offer letter — everything you need to land your first IT position.</p>
+            </div>
+
+            <div class="hired-grid">
+                <div class="hired-card">
+                    <div class="hired-number">01</div>
+                    <h3>Build Your Resume</h3>
+                    <p>No experience? No problem. Highlight your projects, certifications, and home lab work.</p>
+                    <ul>
+                        <li>Use action verbs: "Built," "Configured," "Automated"</li>
+                        <li>Include GitHub projects and lab exercises</li>
+                        <li>List relevant certifications (even in-progress)</li>
+                        <li>Keep it to one page — focus on relevance</li>
+                    </ul>
+                </div>
+
+                <div class="hired-card">
+                    <div class="hired-number">02</div>
+                    <h3>Create a Portfolio</h3>
+                    <p>Show, don't tell. A GitHub profile with real projects speaks louder than any resume.</p>
+                    <ul>
+                        <li>Pin your best 4-6 repositories on GitHub</li>
+                        <li>Write clear README files for each project</li>
+                        <li>Include a personal website or blog</li>
+                        <li>Document your home lab setup</li>
+                    </ul>
+                </div>
+
+                <div class="hired-card">
+                    <div class="hired-number">03</div>
+                    <h3>Optimize LinkedIn</h3>
+                    <p>Recruiters live on LinkedIn. Make sure they can find you.</p>
+                    <ul>
+                        <li>Use a professional photo and compelling headline</li>
+                        <li>Write an "About" section that tells your story</li>
+                        <li>Add skills and get endorsements</li>
+                        <li>Connect with IT professionals and recruiters</li>
+                    </ul>
+                </div>
+
+                <div class="hired-card">
+                    <div class="hired-number">04</div>
+                    <h3>Ace the Interview</h3>
+                    <p>Preparation is everything. Know what to expect and how to respond.</p>
+                    <ul>
+                        <li>Common IT interview questions with answers</li>
+                        <li>Behavioral questions: use the STAR method</li>
+                        <li>Technical questions: think out loud</li>
+                        <li>Always ask questions at the end</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="job-boards">
+                <h3>Where to Find Entry-Level IT Jobs</h3>
+                <div class="boards-grid">
+                    <div class="board-item">
+                        <strong>LinkedIn Jobs</strong>
+                        <p>Filter by "Entry Level" and set up job alerts</p>
+                    </div>
+                    <div class="board-item">
+                        <strong>Indeed</strong>
+                        <p>Largest job board — search "IT Support" or "Junior Developer"</p>
+                    </div>
+                    <div class="board-item">
+                        <strong>Dice</strong>
+                        <p>Tech-specific job board with strong IT presence</p>
+                    </div>
+                    <div class="board-item">
+                        <strong>Company Career Pages</strong>
+                        <p>Apply directly — many companies prefer direct applicants</p>
+                    </div>
+                    <div class="board-item">
+                        <strong>USAJobs.gov</strong>
+                        <p>Government IT jobs — great benefits and job security</p>
+                    </div>
+                    <div class="board-item">
+                        <strong>Staffing Agencies</strong>
+                        <p>Robert Half, TEKsystems, Insight Global — they place entry-level IT</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Certifications Section -->
+    <section class="section certifications" id="certifications">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Prove Your Skills</span>
+                <h2>Certification Roadmap</h2>
+                <p>Certifications that actually matter for entry-level positions. All study materials below are 100% free — exams have a fee, but the knowledge is what counts.</p>
+            </div>
+
+            <div class="cert-grid">
+                <div class="cert-card">
+                    <div class="cert-level beginner">Beginner</div>
+                    <h3>CompTIA A+</h3>
+                    <p>The #1 entry-level IT certification. Covers hardware, software, networking, and troubleshooting.</p>
+                    <div class="cert-details">
+                        <div><strong>Best For:</strong> IT Support, Help Desk</div>
+                        <div><strong>Free Study:</strong> Professor Messer YouTube</div>
+                        <div><strong>Exam Cost:</strong> ~$250 per exam (2 exams)</div>
+                    </div>
+                </div>
+
+                <div class="cert-card">
+                    <div class="cert-level beginner">Beginner</div>
+                    <h3>Google IT Support Certificate</h3>
+                    <p>Google's own certification covering networking, security, and system administration.</p>
+                    <div class="cert-details">
+                        <div><strong>Best For:</strong> IT Support, Help Desk</div>
+                        <div><strong>Free Study:</strong> Audit all courses free on Coursera</div>
+                        <div><strong>Certificate Cost:</strong> Coursera subscription required for certificate only</div>
+                    </div>
+                </div>
+
+                <div class="cert-card">
+                    <div class="cert-level intermediate">Intermediate</div>
+                    <h3>CompTIA Network+</h3>
+                    <p>Validates networking skills — essential for network technician and sysadmin roles.</p>
+                    <div class="cert-details">
+                        <div><strong>Best For:</strong> Network Tech, Sysadmin</div>
+                        <div><strong>Free Study:</strong> Professor Messer YouTube</div>
+                        <div><strong>Exam Cost:</strong> ~$350</div>
+                    </div>
+                </div>
+
+                <div class="cert-card">
+                    <div class="cert-level intermediate">Intermediate</div>
+                    <h3>CompTIA Security+</h3>
+                    <p>The baseline cybersecurity certification. Required for many government IT positions.</p>
+                    <div class="cert-details">
+                        <div><strong>Best For:</strong> Cybersecurity, Government IT</div>
+                        <div><strong>Free Study:</strong> Professor Messer YouTube</div>
+                        <div><strong>Exam Cost:</strong> ~$390</div>
+                    </div>
+                </div>
+
+                <div class="cert-card">
+                    <div class="cert-level beginner">Beginner</div>
+                    <h3>AWS Cloud Practitioner</h3>
+                    <p>Entry-level AWS certification. Proves you understand cloud concepts and AWS services.</p>
+                    <div class="cert-details">
+                        <div><strong>Best For:</strong> Cloud, DevOps</div>
+                        <div><strong>Free Study:</strong> AWS Skill Builder</div>
+                        <div><strong>Exam Cost:</strong> ~$100</div>
+                    </div>
+                </div>
+
+                <div class="cert-card">
+                    <div class="cert-level beginner">Beginner</div>
+                    <h3>Microsoft AZ-900 / SC-900</h3>
+                    <p>Azure fundamentals and security fundamentals. Free training directly from Microsoft.</p>
+                    <div class="cert-details">
+                        <div><strong>Best For:</strong> Cloud, Security</div>
+                        <div><strong>Free Study:</strong> Microsoft Learn</div>
+                        <div><strong>Exam Cost:</strong> ~$165 (often free vouchers available)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cert-tip">
+                <strong>Pro Tip:</strong> All study materials listed above are completely free. Exam fees are the only cost, and many employers will reimburse them after you're hired. Study now for free, certify when you can afford it — the knowledge matters more than the paper.
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section class="section community" id="community">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">You're Not Alone</span>
+                <h2>Community & Mentorship</h2>
+                <p>Connect with people who've been where you are. Get advice, find mentors, and join supportive communities.</p>
+            </div>
+
+            <div class="community-grid">
+                <div class="community-card">
+                    <h3>&#128172; Online Communities</h3>
+                    <ul>
+                        <li><strong>r/ITCareerQuestions</strong> — Reddit's largest IT career community</li>
+                        <li><strong>r/CompTIA</strong> — Certification study groups and tips</li>
+                        <li><strong>r/learnprogramming</strong> — Beginner-friendly coding community</li>
+                        <li><strong>Discord: TryHackMe, The Odin Project</strong> — Active study groups</li>
+                    </ul>
+                </div>
+
+                <div class="community-card">
+                    <h3>&#129309; Mentorship Platforms</h3>
+                    <ul>
+                        <li><strong>ADPList</strong> — Free 1-on-1 mentorship from industry professionals</li>
+                        <li><strong>Coding Coach</strong> — Free open-source mentorship platform for tech</li>
+                        <li><strong>LinkedIn</strong> — Reach out to IT pros; most are happy to help</li>
+                        <li><strong>Local Meetups</strong> — meetup.com tech groups in your area</li>
+                    </ul>
+                </div>
+
+                <div class="community-card">
+                    <h3>&#127919; Networking Tips</h3>
+                    <ul>
+                        <li>Attend local tech meetups and career fairs</li>
+                        <li>Contribute to open source projects on GitHub</li>
+                        <li>Join professional organizations (CompTIA, ISACA student chapters)</li>
+                        <li>Volunteer for non-profit IT work to gain experience</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advice Banner -->
+    <section class="advice-banner">
+        <div class="container">
+            <div class="advice-content">
+                <h2>Remember: Everyone Started Somewhere</h2>
+                <p>
+                    Every senior engineer, every CTO, every IT director was once exactly where you are now.
+                    The IT industry values people who are curious, willing to learn, and show up ready to solve problems.
+                    You don't need to know everything — you just need to start.
+                </p>
+                <div class="advice-tips">
+                    <div class="advice-tip">
+                        <strong>Start Small</strong>
+                        <p>Pick one path. Complete one course. Get one certification. Momentum builds.</p>
+                    </div>
+                    <div class="advice-tip">
+                        <strong>Build Things</strong>
+                        <p>A home lab, a personal project, a GitHub repo — proof of effort beats promises.</p>
+                    </div>
+                    <div class="advice-tip">
+                        <strong>Stay Consistent</strong>
+                        <p>30 minutes a day beats 8 hours once a month. Small daily effort compounds.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h3><span class="logo-icon">&#9889;</span> IT LaunchPad</h3>
+                    <p>Empowering IT freshers and graduates to launch confident, successful careers in technology. All resources are free and curated for quality.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#career-paths">Career Paths</a></li>
+                        <li><a href="#learning-hub">Learning Hub</a></li>
+                        <li><a href="#real-world">Real-World Skills</a></li>
+                        <li><a href="#get-hired">Get Hired</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#certifications">Certifications</a></li>
+                        <li><a href="#community">Community</a></li>
+                        <li><a href="#learning-hub">Free Courses</a></li>
+                        <li><a href="#real-world">Workplace Skills</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Get Started</h4>
+                    <ul>
+                        <li><a href="#career-paths">Pick a Career Path</a></li>
+                        <li><a href="#learning-hub">Start Learning Today</a></li>
+                        <li><a href="#certifications">Plan Your Certifications</a></li>
+                        <li><a href="#community">Find a Mentor</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 IT LaunchPad. Built to empower the next generation of IT professionals.</p>
+                <p>All external resources are owned by their respective organizations. We just curate the best free ones for you.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
