@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Photo Booth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 32px;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-top: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .app-container {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            width: 100%;
+            max-width: 680px;
+            padding: 0 20px;
+        }
+
+        .camera-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid #1e293b;
+            background: #000;
+            aspect-ratio: 4/3;
+        }
+
+        video, canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        canvas#photoCanvas {
+            display: none;
+        }
+
+        /* Countdown overlay */
+        .countdown-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .countdown-overlay.active {
+            display: flex;
+        }
+
+        .countdown-number {
+            font-size: 8rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 0 40px rgba(37, 99, 235, 0.8);
+            animation: countPulse 1s ease-in-out;
+        }
+
+        @keyframes countPulse {
+            0% { transform: scale(1.5); opacity: 0; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.8; }
+        }
+
+        /* Flash effect */
+        .flash {
+            position: absolute;
+            inset: 0;
+            background: white;
+            opacity: 0;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .flash.active {
+            animation: flashAnim 0.4s ease-out;
+        }
+
+        @keyframes flashAnim {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Status indicator */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1e293b;
+            padding: 16px 24px;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        .status-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #64748b;
+            flex-shrink: 0;
+        }
+
+        .status-dot.listening {
+            background: #10b981;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-dot.countdown {
+            background: #f59e0b;
+            animation: pulse 0.5s infinite;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+
+        .status-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .status-text .keyword {
+            color: #06b6d4;
+            font-weight: 700;
+        }
+
+        .heard-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-left: auto;
+            font-style: italic;
+            max-width: 200px;
+            text-align: right;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-start {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-start:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-manual {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 2px solid #334155;
+        }
+
+        .btn-manual:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+        }
+
+        .btn-download {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-download:hover {
+            background: #059669;
+        }
+
+        .btn-retake {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 2px solid #334155;
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Captured photos gallery */
+        .gallery {
+            width: 100%;
+            margin-top: 16px;
+            margin-bottom: 40px;
+        }
+
+        .gallery h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #94a3b8;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .gallery-item:hover {
+            border-color: #2563eb;
+            transform: scale(1.03);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item .photo-time {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .instructions {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px 24px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .instructions h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #06b6d4;
+        }
+
+        .instructions ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .instructions li {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li::before {
+            content: '\2713';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            .countdown-number { font-size: 5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Voice <span>Photo Booth</span></h1>
+    <p class="subtitle">Say "cheese" and the camera will snap your photo</p>
+
+    <div class="app-container">
+
+        <div class="instructions">
+            <h3>How It Works</h3>
+            <ul>
+                <li>Click "Start Camera" to turn on your camera and microphone</li>
+                <li>When you're ready, just say <strong>"cheese"</strong></li>
+                <li>A 3-second countdown will begin, then your photo is captured</li>
+                <li>Download your photos or take as many as you like</li>
+            </ul>
+        </div>
+
+        <div class="camera-wrapper" id="cameraWrapper">
+            <video id="video" autoplay playsinline muted></video>
+            <canvas id="photoCanvas"></canvas>
+            <div class="countdown-overlay" id="countdownOverlay">
+                <span class="countdown-number" id="countdownNumber">3</span>
+            </div>
+            <div class="flash" id="flash"></div>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            <div class="status-dot" id="statusDot"></div>
+            <span class="status-text" id="statusText">Click "Start Camera" to begin</span>
+            <span class="heard-text" id="heardText"></span>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn">Start Camera</button>
+            <button class="btn btn-manual" id="manualBtn" disabled>Take Photo Manually</button>
+        </div>
+
+        <div class="gallery" id="gallery" style="display: none;">
+            <h3>Captured Photos</h3>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const photoCanvas = document.getElementById('photoCanvas');
+        const ctx = photoCanvas.getContext('2d');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownNumber = document.getElementById('countdownNumber');
+        const flash = document.getElementById('flash');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const heardText = document.getElementById('heardText');
+        const startBtn = document.getElementById('startBtn');
+        const manualBtn = document.getElementById('manualBtn');
+        const gallery = document.getElementById('gallery');
+        const galleryGrid = document.getElementById('galleryGrid');
+
+        let stream = null;
+        let recognition = null;
+        let isCountingDown = false;
+        let photos = [];
+
+        const TRIGGER_WORDS = ['cheese'];
+
+        // Start camera and mic
+        startBtn.addEventListener('click', async () => {
+            if (stream) {
+                stopEverything();
+                return;
+            }
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } },
+                    audio: false
+                });
+
+                video.srcObject = stream;
+                startBtn.textContent = 'Stop Camera';
+                manualBtn.disabled = false;
+
+                startSpeechRecognition();
+            } catch (err) {
+                setStatus('error', 'Camera access denied. Please allow camera permissions.');
+                console.error('Camera error:', err);
+            }
+        });
+
+        // Manual capture button
+        manualBtn.addEventListener('click', () => {
+            if (!isCountingDown && stream) {
+                startCountdown();
+            }
+        });
+
+        function startSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                setStatus('listening', 'Voice not supported in this browser — use the manual button');
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                setStatus('listening', 'Listening... say <span class="keyword">"cheese"</span>');
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+
+                transcript = transcript.toLowerCase().trim();
+                heardText.textContent = `"${transcript}"`;
+
+                if (!isCountingDown) {
+                    for (const word of TRIGGER_WORDS) {
+                        if (transcript.includes(word)) {
+                            startCountdown();
+                            break;
+                        }
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                if (event.error === 'no-speech') return; // normal, just restart
+                if (event.error === 'aborted') return;
+                console.error('Speech error:', event.error);
+                setStatus('error', `Mic error: ${event.error}. Using manual mode.`);
+            };
+
+            recognition.onend = () => {
+                // Restart if still active
+                if (stream) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        // already started
+                    }
+                }
+            };
+
+            recognition.start();
+        }
+
+        function startCountdown() {
+            isCountingDown = true;
+            statusDot.className = 'status-dot countdown';
+            statusText.innerHTML = 'Get ready...';
+            manualBtn.disabled = true;
+
+            let count = 3;
+            countdownOverlay.classList.add('active');
+            countdownNumber.textContent = count;
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNumber.textContent = count;
+                    // Re-trigger animation
+                    countdownNumber.style.animation = 'none';
+                    countdownNumber.offsetHeight; // force reflow
+                    countdownNumber.style.animation = 'countPulse 1s ease-in-out';
+                } else {
+                    clearInterval(interval);
+                    countdownOverlay.classList.remove('active');
+                    capturePhoto();
+                }
+            }, 1000);
+        }
+
+        function capturePhoto() {
+            // Flash effect
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 400);
+
+            // Capture from video
+            photoCanvas.width = video.videoWidth;
+            photoCanvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            const dataUrl = photoCanvas.toDataURL('image/jpeg', 0.92);
+            const timestamp = new Date().toLocaleTimeString();
+
+            photos.push({ dataUrl, timestamp });
+            addToGallery(dataUrl, timestamp, photos.length - 1);
+
+            // Reset state
+            isCountingDown = false;
+            manualBtn.disabled = false;
+
+            if (recognition) {
+                setStatus('listening', 'Photo captured! Say <span class="keyword">"cheese"</span> for another');
+            } else {
+                setStatus('listening', 'Photo captured! Click manual button for another');
+            }
+        }
+
+        function addToGallery(dataUrl, timestamp, index) {
+            gallery.style.display = 'block';
+
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.innerHTML = `
+                <img src="${dataUrl}" alt="Photo ${index + 1}">
+                <div class="photo-time">${timestamp}</div>
+            `;
+
+            item.addEventListener('click', () => {
+                downloadPhoto(dataUrl, index);
+            });
+
+            galleryGrid.prepend(item);
+        }
+
+        function downloadPhoto(dataUrl, index) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `photo-booth-${index + 1}.jpg`;
+            link.click();
+        }
+
+        function setStatus(type, message) {
+            statusDot.className = `status-dot ${type}`;
+            statusText.innerHTML = message;
+        }
+
+        function stopEverything() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                video.srcObject = null;
+            }
+            if (recognition) {
+                recognition.abort();
+                recognition = null;
+            }
+            startBtn.textContent = 'Start Camera';
+            manualBtn.disabled = true;
+            heardText.textContent = '';
+            setStatus('', 'Camera stopped. Click "Start Camera" to begin again.');
+        }
+    </script>
+
+</body>
+</html>

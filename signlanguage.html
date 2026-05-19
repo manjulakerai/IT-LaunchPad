@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Reader &amp; Teacher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            padding: 24px 20px 0;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .page-header h1 span {
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header .subtitle {
+            color: #94a3b8;
+            margin-top: 6px;
+            font-size: 0.95rem;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin: 20px auto 0;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 4px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #e2e8f0;
+            background: #334155;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 0 20px 40px;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ===================== LEFT: Camera ===================== */
+        .camera-col {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .camera-area {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid #1e293b;
+            background: #000;
+            aspect-ratio: 4/3;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        canvas#overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform: scaleX(-1);
+        }
+
+        .detection-bar {
+            position: absolute;
+            top: 16px; left: 16px; right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 5;
+        }
+
+        .current-letter {
+            background: rgba(139, 92, 246, 0.9);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .current-letter .label { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-weight: 500; }
+        .current-letter .letter { font-size: 2.5rem; font-weight: 800; color: white; min-width: 50px; text-align: center; line-height: 1; }
+
+        .confidence-badge {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .confidence-badge strong { color: #10b981; }
+
+        .loading-screen {
+            position: absolute; inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 20; border-radius: 13px;
+        }
+
+        .loading-screen.hidden { display: none; }
+
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid #334155;
+            border-top-color: #8b5cf6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-screen p { color: #94a3b8; font-size: 0.95rem; }
+
+        /* Status + Controls */
+        .status-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: #1e293b; padding: 14px 20px; border-radius: 10px;
+        }
+
+        .status-dot {
+            width: 12px; height: 12px; border-radius: 50%; background: #64748b; flex-shrink: 0;
+        }
+
+        .status-dot.active { background: #10b981; animation: pulse 1.5s infinite; }
+        .status-dot.loading { background: #f59e0b; animation: pulse 0.8s infinite; }
+        .status-dot.error { background: #ef4444; }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(16,185,129,0); }
+        }
+
+        .status-text { font-size: 0.9rem; }
+
+        .controls { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        .btn {
+            padding: 12px 24px; border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+            border: none; cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .btn-start { background: #8b5cf6; color: white; box-shadow: 0 4px 14px rgba(139,92,246,0.3); }
+        .btn-start:hover { background: #7c3aed; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* Output */
+        .output-section {
+            background: #1e293b; border-radius: 14px; padding: 20px;
+        }
+
+        .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .output-header h3 { font-size: 0.95rem; font-weight: 700; color: #94a3b8; }
+
+        .output-actions { display: flex; gap: 6px; }
+
+        .btn-sm {
+            padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600;
+            border: none; cursor: pointer; font-family: inherit; transition: all 0.2s;
+        }
+
+        .btn-clear { background: #334155; color: #94a3b8; }
+        .btn-clear:hover { background: #475569; color: #e2e8f0; }
+        .btn-space { background: #2563eb; color: white; }
+        .btn-space:hover { background: #1d4ed8; }
+        .btn-backspace { background: #dc2626; color: white; }
+        .btn-backspace:hover { background: #b91c1c; }
+
+        .translated-text {
+            font-size: 1.6rem; font-weight: 700; color: #e2e8f0;
+            min-height: 50px; padding: 14px;
+            background: #0f172a; border-radius: 10px;
+            word-wrap: break-word; letter-spacing: 2px;
+        }
+
+        .translated-text .cursor-blink { animation: blink 1s step-end infinite; color: #8b5cf6; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* ===================== RIGHT: Teaching Panel ===================== */
+        .teach-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .teach-panel::-webkit-scrollbar { width: 6px; }
+        .teach-panel::-webkit-scrollbar-track { background: transparent; }
+        .teach-panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+        /* Panel card shared */
+        .panel-card {
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .panel-card h3 {
+            font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .panel-card h3 .icon { font-size: 1.2rem; }
+
+        /* Letter detail card */
+        .letter-detail {
+            text-align: center;
+        }
+
+        .letter-detail .big-letter {
+            font-size: 4rem; font-weight: 800;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .letter-detail .letter-name {
+            font-size: 1.1rem; font-weight: 600; color: #94a3b8; margin: 4px 0 16px;
+        }
+
+        .hand-diagram {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hand-svg {
+            width: 160px;
+            height: 180px;
+        }
+
+        .step-list {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .step-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 0.88rem; color: #cbd5e1; line-height: 1.5;
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 22px; height: 22px;
+            background: #8b5cf6;
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.72rem; font-weight: 700;
+        }
+
+        /* Letter grid selector */
+        .letter-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 4px;
+        }
+
+        .letter-cell {
+            background: #0f172a;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 8px 2px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .letter-cell:hover {
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        .letter-cell.active {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        .letter-cell.detected {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        /* Practice mode */
+        .practice-target {
+            text-align: center;
+            padding: 16px;
+            background: #0f172a;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .practice-target .prompt-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .practice-target .target-letter {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #f59e0b;
+            line-height: 1.1;
+        }
+
+        .practice-target .target-word {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #f59e0b;
+            letter-spacing: 6px;
+            margin-top: 4px;
+        }
+
+        .practice-target .target-word .done {
+            color: #10b981;
+        }
+
+        .practice-target .target-word .current {
+            color: #f59e0b;
+            text-decoration: underline;
+        }
+
+        .practice-target .target-word .pending {
+            color: #475569;
+        }
+
+        .practice-progress {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #0f172a;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .practice-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .practice-btns .btn-sm {
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-practice {
+            background: #f59e0b;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .btn-practice:hover { background: #d97706; }
+
+        .btn-next { background: #334155; color: #e2e8f0; }
+        .btn-next:hover { background: #475569; }
+
+        .result-msg {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .result-msg.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .result-msg.wrong {
+            display: block;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* Common phrases */
+        .phrase-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .phrase-item {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .phrase-item:hover {
+            border-color: #8b5cf6;
+        }
+
+        .phrase-item.active {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .phrase-word {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #e2e8f0;
+            margin-bottom: 2px;
+        }
+
+        .phrase-spelling {
+            font-size: 0.82rem;
+            color: #64748b;
+            letter-spacing: 3px;
+        }
+
+        .phrase-desc {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* Tips */
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .tip-icon {
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            margin-top: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .teach-panel {
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 { font-size: 1.5rem; }
+            .current-letter .letter { font-size: 2rem; }
+            .translated-text { font-size: 1.2rem; }
+            .letter-grid { grid-template-columns: repeat(7, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>Sign Language <span>Reader &amp; Teacher</span></h1>
+        <p class="subtitle">Learn ASL finger-spelling and practice with real-time hand tracking</p>
+    </div>
+
+    <div class="main-layout">
+        <!-- LEFT: Camera Column -->
+        <div class="camera-col">
+            <div class="camera-area">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="overlay"></canvas>
+                <div class="detection-bar" id="detectionBar" style="display:none;">
+                    <div class="current-letter">
+                        <span class="label">Detected</span>
+                        <span class="letter" id="currentLetter">-</span>
+                    </div>
+                    <div class="confidence-badge">
+                        Confidence: <strong id="confidenceValue">-</strong>
+                    </div>
+                </div>
+                <div class="loading-screen" id="loadingScreen">
+                    <div class="spinner"></div>
+                    <p>Loading hand tracking model...</p>
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-text" id="statusText">Click "Start Camera" to begin</span>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-start" id="startBtn">Start Camera</button>
+            </div>
+
+            <div class="output-section">
+                <div class="output-header">
+                    <h3>Translated Text</h3>
+                    <div class="output-actions">
+                        <button class="btn-sm btn-space" id="spaceBtn">Space</button>
+                        <button class="btn-sm btn-backspace" id="backspaceBtn">Backspace</button>
+                        <button class="btn-sm btn-clear" id="clearBtn">Clear</button>
+                    </div>
+                </div>
+                <div class="translated-text" id="translatedText"><span class="cursor-blink">|</span></div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Teaching Panel -->
+        <div class="teach-panel">
+            <!-- Tab Nav -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="learn">Learn</button>
+                <button class="tab-btn" data-tab="practice">Practice</button>
+                <button class="tab-btn" data-tab="phrases">Phrases</button>
+            </div>
+
+            <!-- ===== LEARN TAB ===== -->
+            <div class="tab-content active" id="tab-learn">
+                <!-- Letter Selector -->
+                <div class="panel-card">
+                    <h3><span class="icon">&#9996;&#65039;</span> Choose a Letter to Learn</h3>
+                    <div class="letter-grid" id="letterGrid"></div>
+                </div>
+
+                <!-- Letter Detail -->
+                <div class="panel-card letter-detail" id="letterDetail">
+                    <div class="big-letter" id="bigLetter">A</div>
+                    <div class="letter-name" id="letterName">Letter A</div>
+                    <div class="hand-diagram">
+                        <svg class="hand-svg" id="handSvg" viewBox="0 0 160 180"></svg>
+                    </div>
+                    <div class="step-list" id="stepList"></div>
+                </div>
+
+                <!-- Tips -->
+                <div class="panel-card">
+                    <h3><span class="icon">&#128161;</span> Tips for Better Recognition</h3>
+                    <div class="tips-list">
+                        <div class="tip-item">
+                            <span class="tip-icon">&#9728;&#65039;</span>
+                            <span>Use good lighting — face a window or lamp so your hand is well-lit.</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">&#128400;</span>
+                            <span>Keep your hand at chest height, centered in the camera frame.</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">&#127912;</span>
+                            <span>Use a plain background — busy backgrounds can confuse tracking.</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">&#9995;</span>
+                            <span>Show your full palm — make sure all fingers are visible to the camera.</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">&#128340;</span>
+                            <span>Hold each sign steady for about 1 second for the app to recognise it.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PRACTICE TAB ===== -->
+            <div class="tab-content" id="tab-practice">
+                <div class="panel-card">
+                    <h3><span class="icon">&#127919;</span> Practice Mode</h3>
+                    <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:14px;">
+                        The app will show you a letter — sign it correctly to move on. Start the camera first!
+                    </p>
+
+                    <div class="practice-target" id="practiceTarget">
+                        <div class="prompt-label">Sign this letter:</div>
+                        <div class="target-letter" id="targetLetter">A</div>
+                    </div>
+
+                    <div class="practice-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">0 / 26</span>
+                    </div>
+
+                    <div class="result-msg" id="resultMsg"></div>
+
+                    <div class="practice-btns">
+                        <button class="btn-sm btn-practice" id="startPracticeBtn">Start Practice</button>
+                        <button class="btn-sm btn-next" id="skipBtn">Skip Letter</button>
+                    </div>
+                </div>
+
+                <!-- Practice Stats -->
+                <div class="panel-card" id="practiceStats">
+                    <h3><span class="icon">&#128200;</span> Your Progress</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; text-align:center;">
+                        <div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#10b981;" id="statCorrect">0</div>
+                            <div style="font-size:0.78rem; color:#64748b;">Correct</div>
+                        </div>
+                        <div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#f59e0b;" id="statSkipped">0</div>
+                            <div style="font-size:0.78rem; color:#64748b;">Skipped</div>
+                        </div>
+                        <div>
+                            <div style="font-size:1.8rem; font-weight:800; color:#8b5cf6;" id="statStreak">0</div>
+                            <div style="font-size:0.78rem; color:#64748b;">Streak</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PHRASES TAB ===== -->
+            <div class="tab-content" id="tab-phrases">
+                <div class="panel-card">
+                    <h3><span class="icon">&#128172;</span> Common Words &amp; Phrases</h3>
+                    <p style="font-size:0.85rem; color:#94a3b8; margin-bottom:14px;">
+                        Practice spelling these common words. Click one to start a guided spelling challenge!
+                    </p>
+
+                    <div class="phrase-list" id="phraseList"></div>
+                </div>
+
+                <!-- Word practice area -->
+                <div class="panel-card" id="wordPracticeCard" style="display:none;">
+                    <h3><span class="icon">&#127775;</span> Spell It Out!</h3>
+                    <div class="practice-target">
+                        <div class="prompt-label">Now sign:</div>
+                        <div class="target-letter" id="wordTargetLetter">-</div>
+                        <div class="target-word" id="wordProgress"></div>
+                    </div>
+                    <div class="result-msg" id="wordResultMsg"></div>
+                    <div class="practice-btns">
+                        <button class="btn-sm btn-next" id="wordCancelBtn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MediaPipe Hands -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.min.js" crossorigin="anonymous"></script>
+
+    <script>
+    (function() {
+        // ===========================
+        // ASL Letter Data
+        // ===========================
+        const ASL_DATA = {
+            A: {
+                name: 'Letter A',
+                steps: [
+                    'Make a fist with your dominant hand.',
+                    'Tuck all four fingers tightly against your palm.',
+                    'Rest your thumb on the side of your fist, next to your index finger.',
+                    'Your thumb should point upward, not across your fingers.'
+                ],
+                fingers: 'Fist with thumb resting on the side'
+            },
+            B: {
+                name: 'Letter B',
+                steps: [
+                    'Hold your hand up with palm facing forward.',
+                    'Extend all four fingers straight up, held together.',
+                    'Tuck your thumb across your palm, beneath your fingers.',
+                    'Keep fingers straight and close together.'
+                ],
+                fingers: 'Four fingers up, thumb tucked across palm'
+            },
+            C: {
+                name: 'Letter C',
+                steps: [
+                    'Curve all your fingers and thumb to form the shape of the letter C.',
+                    'Keep your thumb below and fingers above, forming an arc.',
+                    'Your hand should look like you are holding a can.',
+                    'Fingers and thumb should not touch.'
+                ],
+                fingers: 'Curved hand forming a C shape'
+            },
+            D: {
+                name: 'Letter D',
+                steps: [
+                    'Extend your index finger straight up.',
+                    'Curl your middle, ring, and pinky fingers down.',
+                    'Touch the tips of those three curled fingers to your thumb.',
+                    'Your hand forms a "d" shape from the side.'
+                ],
+                fingers: 'Index up, others curled touching thumb'
+            },
+            E: {
+                name: 'Letter E',
+                steps: [
+                    'Curl all four fingers down toward your palm.',
+                    'Your fingertips should rest near the top of your palm.',
+                    'Tuck your thumb under and across your curled fingers.',
+                    'Your hand looks like a rounded fist.'
+                ],
+                fingers: 'All fingers curled, thumb tucked under'
+            },
+            F: {
+                name: 'Letter F',
+                steps: [
+                    'Touch the tip of your index finger to the tip of your thumb, forming a circle.',
+                    'Extend your middle, ring, and pinky fingers straight up.',
+                    'Keep the three extended fingers slightly spread.',
+                    'It looks like an "OK" sign.'
+                ],
+                fingers: 'Index-thumb circle, three fingers up'
+            },
+            G: {
+                name: 'Letter G',
+                steps: [
+                    'Point your index finger sideways (horizontal).',
+                    'Extend your thumb parallel to your index finger.',
+                    'Curl your middle, ring, and pinky fingers into your palm.',
+                    'Your hand faces the viewer sideways.'
+                ],
+                fingers: 'Index pointing sideways, thumb parallel'
+            },
+            H: {
+                name: 'Letter H',
+                steps: [
+                    'Extend your index and middle fingers together, pointing sideways.',
+                    'Keep both fingers held together horizontally.',
+                    'Curl your ring finger, pinky, and thumb down.',
+                    'Similar to G but with two fingers.'
+                ],
+                fingers: 'Index and middle pointing sideways'
+            },
+            I: {
+                name: 'Letter I',
+                steps: [
+                    'Make a fist with your hand.',
+                    'Extend only your pinky finger straight up.',
+                    'Keep your thumb tucked over your other fingers.',
+                    'Only the pinky should be visible.'
+                ],
+                fingers: 'Fist with pinky extended up'
+            },
+            J: {
+                name: 'Letter J',
+                steps: [
+                    'Start with the "I" hand shape (pinky extended).',
+                    'Trace the letter J in the air with your pinky.',
+                    'Move your hand down and curve it toward you.',
+                    'Note: J requires motion, not just a static pose.'
+                ],
+                fingers: 'Like I, but trace a J shape in the air'
+            },
+            K: {
+                name: 'Letter K',
+                steps: [
+                    'Extend your index and middle fingers upward in a V.',
+                    'Place your thumb between the index and middle fingers.',
+                    'The thumb tip should rest against your middle finger.',
+                    'Curl your ring and pinky fingers down.'
+                ],
+                fingers: 'V-shape with thumb between index and middle'
+            },
+            L: {
+                name: 'Letter L',
+                steps: [
+                    'Extend your index finger straight up.',
+                    'Extend your thumb out to the side at a 90-degree angle.',
+                    'Curl your middle, ring, and pinky fingers down.',
+                    'Your hand forms an "L" shape.'
+                ],
+                fingers: 'Index up, thumb out — L shape'
+            },
+            M: {
+                name: 'Letter M',
+                steps: [
+                    'Tuck your thumb under your first three fingers (index, middle, ring).',
+                    'Your three fingers drape over your thumb.',
+                    'Your pinky stays beside your ring finger.',
+                    'Three bumps show over the thumb.'
+                ],
+                fingers: 'Thumb under three fingers'
+            },
+            N: {
+                name: 'Letter N',
+                steps: [
+                    'Tuck your thumb under your first two fingers (index and middle).',
+                    'Your index and middle fingers drape over your thumb.',
+                    'Curl your ring and pinky fingers down.',
+                    'Two bumps show over the thumb.'
+                ],
+                fingers: 'Thumb under two fingers'
+            },
+            O: {
+                name: 'Letter O',
+                steps: [
+                    'Curve all your fingers and bring them together to touch your thumb.',
+                    'All fingertips should meet at the thumb tip.',
+                    'Your hand forms a round "O" shape.',
+                    'Keep the shape smooth and circular.'
+                ],
+                fingers: 'All fingertips touching thumb in O shape'
+            },
+            P: {
+                name: 'Letter P',
+                steps: [
+                    'Same hand shape as the letter K.',
+                    'But tilt your hand downward so fingers point at the floor.',
+                    'Index and middle extend in a V, thumb between them.',
+                    'Your wrist angles the hand downward.'
+                ],
+                fingers: 'Like K but pointing downward'
+            },
+            Q: {
+                name: 'Letter Q',
+                steps: [
+                    'Same hand shape as the letter G.',
+                    'But point your hand downward.',
+                    'Index finger and thumb extend downward together.',
+                    'Other fingers are curled into the palm.'
+                ],
+                fingers: 'Like G but pointing downward'
+            },
+            R: {
+                name: 'Letter R',
+                steps: [
+                    'Cross your index and middle fingers.',
+                    'Your middle finger should cross over your index finger.',
+                    'Curl your ring and pinky fingers down.',
+                    'Tuck your thumb over the ring and pinky.'
+                ],
+                fingers: 'Index and middle crossed'
+            },
+            S: {
+                name: 'Letter S',
+                steps: [
+                    'Make a fist with your hand.',
+                    'Wrap your thumb across the front of your curled fingers.',
+                    'Your thumb rests over the middle section of your fingers.',
+                    'Different from A where thumb is on the side.'
+                ],
+                fingers: 'Fist with thumb over front of fingers'
+            },
+            T: {
+                name: 'Letter T',
+                steps: [
+                    'Make a fist with your hand.',
+                    'Tuck your thumb between your index and middle fingers.',
+                    'The thumb tip peeks out between those two fingers.',
+                    'Keep the rest of your fist tight.'
+                ],
+                fingers: 'Thumb tucked between index and middle'
+            },
+            U: {
+                name: 'Letter U',
+                steps: [
+                    'Extend your index and middle fingers straight up.',
+                    'Hold the two fingers close together (not spread).',
+                    'Curl your ring and pinky fingers down.',
+                    'Tuck your thumb over the ring and pinky.'
+                ],
+                fingers: 'Index and middle up together'
+            },
+            V: {
+                name: 'Letter V',
+                steps: [
+                    'Extend your index and middle fingers upward.',
+                    'Spread them apart to form a V shape (peace sign).',
+                    'Curl your ring and pinky fingers down.',
+                    'Tuck your thumb over the curled fingers.'
+                ],
+                fingers: 'Peace sign — index and middle spread'
+            },
+            W: {
+                name: 'Letter W',
+                steps: [
+                    'Extend your index, middle, and ring fingers upward.',
+                    'Spread all three fingers apart.',
+                    'Curl your pinky down and tuck thumb over it.',
+                    'Three fingers up forming a W.'
+                ],
+                fingers: 'Three fingers up and spread'
+            },
+            X: {
+                name: 'Letter X',
+                steps: [
+                    'Extend your index finger and bend it into a hook.',
+                    'Curl just the top joint of your index finger.',
+                    'Keep all other fingers and thumb curled in a fist.',
+                    'Your index finger looks like a hook.'
+                ],
+                fingers: 'Index finger hooked at top joint'
+            },
+            Y: {
+                name: 'Letter Y',
+                steps: [
+                    'Extend your thumb and pinky finger outward.',
+                    'Curl your index, middle, and ring fingers down.',
+                    'Your hand makes a "hang loose" or "shaka" sign.',
+                    'Thumb and pinky point in opposite directions.'
+                ],
+                fingers: 'Thumb and pinky extended (hang loose)'
+            },
+            Z: {
+                name: 'Letter Z',
+                steps: [
+                    'Point your index finger forward.',
+                    'Trace the letter Z in the air.',
+                    'Move diagonally right, then left, then right again.',
+                    'Note: Z requires motion, not just a static pose.'
+                ],
+                fingers: 'Index pointing out, trace Z in the air'
+            }
+        };
+
+        // Common words/phrases to practice
+        const PHRASES = [
+            { word: 'HELLO', desc: 'A friendly greeting' },
+            { word: 'THANKS', desc: 'Show appreciation' },
+            { word: 'PLEASE', desc: 'Polite request' },
+            { word: 'SORRY', desc: 'An apology' },
+            { word: 'YES', desc: 'Affirmative response' },
+            { word: 'NO', desc: 'Negative response' },
+            { word: 'HELP', desc: 'Ask for assistance' },
+            { word: 'FRIEND', desc: 'A close companion' },
+            { word: 'LOVE', desc: 'Express affection' },
+            { word: 'NAME', desc: 'Ask someone\'s name' },
+            { word: 'GOOD', desc: 'Positive response' },
+            { word: 'BAD', desc: 'Negative response' },
+            { word: 'WORK', desc: 'Job or occupation' },
+            { word: 'HOME', desc: 'Where you live' },
+            { word: 'SCHOOL', desc: 'Place of learning' }
+        ];
+
+        // ===========================
+        // DOM Elements
+        // ===========================
+        const video = document.getElementById('video');
+        const overlayCanvas = document.getElementById('overlay');
+        const ctx = overlayCanvas.getContext('2d');
+        const currentLetterEl = document.getElementById('currentLetter');
+        const confidenceEl = document.getElementById('confidenceValue');
+        const detectionBar = document.getElementById('detectionBar');
+        const translatedText = document.getElementById('translatedText');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const startBtn = document.getElementById('startBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const spaceBtn = document.getElementById('spaceBtn');
+        const backspaceBtn = document.getElementById('backspaceBtn');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const letterGrid = document.getElementById('letterGrid');
+        const bigLetter = document.getElementById('bigLetter');
+        const letterName = document.getElementById('letterName');
+        const stepList = document.getElementById('stepList');
+        const handSvg = document.getElementById('handSvg');
+
+        // Practice elements
+        const targetLetter = document.getElementById('targetLetter');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const resultMsg = document.getElementById('resultMsg');
+        const startPracticeBtn = document.getElementById('startPracticeBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const statCorrect = document.getElementById('statCorrect');
+        const statSkipped = document.getElementById('statSkipped');
+        const statStreak = document.getElementById('statStreak');
+
+        // Phrase elements
+        const phraseList = document.getElementById('phraseList');
+        const wordPracticeCard = document.getElementById('wordPracticeCard');
+        const wordTargetLetter = document.getElementById('wordTargetLetter');
+        const wordProgress = document.getElementById('wordProgress');
+        const wordResultMsg = document.getElementById('wordResultMsg');
+        const wordCancelBtn = document.getElementById('wordCancelBtn');
+
+        // ===========================
+        // State
+        // ===========================
+        let camera = null;
+        let hands = null;
+        let isRunning = false;
+        let builtText = '';
+        let lastDetected = '';
+        let detectCount = 0;
+        const CONFIRM_FRAMES = 15;
+        let cooldown = 0;
+        let selectedLetter = 'A';
+        let currentDetectedLetter = null;
+
+        // Practice state
+        let practiceActive = false;
+        let practiceLetters = [];
+        let practiceIndex = 0;
+        let practiceCorrect = 0;
+        let practiceSkipped = 0;
+        let practiceStreak = 0;
+
+        // Word practice state
+        let wordPracticeActive = false;
+        let wordTarget = '';
+        let wordIndex = 0;
+
+        // ===========================
+        // Tab Switching
+        // ===========================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // ===========================
+        // Learn Tab: Letter Grid + Detail
+        // ===========================
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        alphabet.forEach(letter => {
+            const cell = document.createElement('div');
+            cell.className = 'letter-cell' + (letter === 'A' ? ' active' : '');
+            cell.textContent = letter;
+            cell.addEventListener('click', () => selectLetter(letter));
+            letterGrid.appendChild(cell);
+        });
+
+        function selectLetter(letter) {
+            selectedLetter = letter;
+            document.querySelectorAll('.letter-cell').forEach(c => c.classList.remove('active'));
+            const cells = letterGrid.querySelectorAll('.letter-cell');
+            cells[alphabet.indexOf(letter)].classList.add('active');
+
+            const data = ASL_DATA[letter];
+            bigLetter.textContent = letter;
+            letterName.textContent = data.name;
+
+            // Steps
+            stepList.innerHTML = '';
+            data.steps.forEach((step, i) => {
+                const div = document.createElement('div');
+                div.className = 'step-item';
+                div.innerHTML = `<span class="step-num">${i + 1}</span><span>${step}</span>`;
+                stepList.appendChild(div);
+            });
+
+            // Draw hand diagram
+            drawHandDiagram(letter);
+        }
+
+        function drawHandDiagram(letter) {
+            // SVG hand diagrams for each letter
+            const data = ASL_DATA[letter];
+            handSvg.innerHTML = '';
+
+            // Draw a simplified hand with finger positions
+            const svg = handSvg;
+            const ns = 'http://www.w3.org/2000/svg';
+
+            // Palm
+            const palm = document.createElementNS(ns, 'ellipse');
+            palm.setAttribute('cx', '80'); palm.setAttribute('cy', '120');
+            palm.setAttribute('rx', '35'); palm.setAttribute('ry', '42');
+            palm.setAttribute('fill', '#334155'); palm.setAttribute('stroke', '#8b5cf6'); palm.setAttribute('stroke-width', '2');
+            svg.appendChild(palm);
+
+            // Finger configurations for each letter
+            const configs = getFingerConfig(letter);
+
+            // Draw fingers
+            configs.fingers.forEach(f => {
+                const line = document.createElementNS(ns, 'line');
+                line.setAttribute('x1', f.x1); line.setAttribute('y1', f.y1);
+                line.setAttribute('x2', f.x2); line.setAttribute('y2', f.y2);
+                line.setAttribute('stroke', f.color || '#8b5cf6');
+                line.setAttribute('stroke-width', f.width || '6');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+
+                // Fingertip circle
+                const tip = document.createElementNS(ns, 'circle');
+                tip.setAttribute('cx', f.x2); tip.setAttribute('cy', f.y2);
+                tip.setAttribute('r', '4');
+                tip.setAttribute('fill', f.color || '#06b6d4');
+                svg.appendChild(tip);
+            });
+
+            // Thumb
+            if (configs.thumb) {
+                const t = configs.thumb;
+                const line = document.createElementNS(ns, 'line');
+                line.setAttribute('x1', t.x1); line.setAttribute('y1', t.y1);
+                line.setAttribute('x2', t.x2); line.setAttribute('y2', t.y2);
+                line.setAttribute('stroke', '#f59e0b');
+                line.setAttribute('stroke-width', '6');
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+
+                const tip = document.createElementNS(ns, 'circle');
+                tip.setAttribute('cx', t.x2); tip.setAttribute('cy', t.y2);
+                tip.setAttribute('r', '4');
+                tip.setAttribute('fill', '#f59e0b');
+                svg.appendChild(tip);
+            }
+
+            // Label
+            const text = document.createElementNS(ns, 'text');
+            text.setAttribute('x', '80'); text.setAttribute('y', '16');
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#64748b'); text.setAttribute('font-size', '11');
+            text.setAttribute('font-family', 'Inter, sans-serif');
+            text.textContent = data.fingers;
+            svg.appendChild(text);
+        }
+
+        function getFingerConfig(letter) {
+            // Simplified finger position configs for SVG diagrams
+            // Each finger: {x1, y1 (base), x2, y2 (tip)}
+            const base = { index: {x:65,y:90}, middle: {x:75,y:85}, ring: {x:87,y:87}, pinky: {x:97,y:93} };
+            const thumbBase = { x: 50, y: 110 };
+
+            const up = (b, offset=0) => ({ x1:b.x, y1:b.y, x2:b.x+offset, y2:b.y-45 });
+            const curled = (b) => ({ x1:b.x, y1:b.y, x2:b.x+2, y2:b.y+10, color:'#475569' });
+            const side = (b, dx) => ({ x1:b.x, y1:b.y, x2:b.x+dx, y2:b.y-10 });
+
+            const thumbSide = { x1:thumbBase.x, y1:thumbBase.y, x2:35, y2:100 };
+            const thumbAcross = { x1:thumbBase.x, y1:thumbBase.y, x2:70, y2:115 };
+            const thumbUp = { x1:thumbBase.x, y1:thumbBase.y, x2:35, y2:80 };
+            const thumbDown = { x1:thumbBase.x, y1:thumbBase.y, x2:65, y2:125 };
+
+            const configs = {
+                A: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbSide },
+                B: { fingers: [up(base.index), up(base.middle), up(base.ring), up(base.pinky)], thumb: thumbAcross },
+                C: { fingers: [side(base.index,-15), side(base.middle,-10), side(base.ring,0), side(base.pinky,5)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:30,y2:115} },
+                D: { fingers: [up(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbAcross },
+                E: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbDown },
+                F: { fingers: [{x1:base.index.x,y1:base.index.y,x2:55,y2:110,color:'#475569'}, up(base.middle), up(base.ring), up(base.pinky)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:55,y2:105} },
+                G: { fingers: [side(base.index,-40), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:20,y2:95} },
+                H: { fingers: [side(base.index,-40), side(base.middle,-35), curled(base.ring), curled(base.pinky)], thumb: thumbDown },
+                I: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), up(base.pinky)], thumb: thumbAcross },
+                J: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), up(base.pinky)], thumb: thumbAcross },
+                K: { fingers: [up(base.index,-5), up(base.middle,5), curled(base.ring), curled(base.pinky)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:70,y2:85} },
+                L: { fingers: [up(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbUp },
+                M: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbDown },
+                N: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbDown },
+                O: { fingers: [{x1:base.index.x,y1:base.index.y,x2:55,y2:105,color:'#475569'}, {x1:base.middle.x,y1:base.middle.y,x2:65,y2:108,color:'#475569'}, {x1:base.ring.x,y1:base.ring.y,x2:77,y2:110,color:'#475569'}, {x1:base.pinky.x,y1:base.pinky.y,x2:85,y2:112,color:'#475569'}], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:55,y2:108} },
+                P: { fingers: [side(base.index,-30), side(base.middle,-25), curled(base.ring), curled(base.pinky)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:55,y2:95} },
+                Q: { fingers: [side(base.index,-30), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:30,y2:120} },
+                R: { fingers: [{x1:base.index.x,y1:base.index.y,x2:70,y2:42}, {x1:base.middle.x,y1:base.middle.y,x2:68,y2:40}, curled(base.ring), curled(base.pinky)], thumb: thumbAcross },
+                S: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbAcross },
+                T: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: {x1:thumbBase.x,y1:thumbBase.y,x2:68,y2:95} },
+                U: { fingers: [up(base.index,2), up(base.middle,-2), curled(base.ring), curled(base.pinky)], thumb: thumbAcross },
+                V: { fingers: [up(base.index,-8), up(base.middle,8), curled(base.ring), curled(base.pinky)], thumb: thumbAcross },
+                W: { fingers: [up(base.index,-5), up(base.middle), up(base.ring,5), curled(base.pinky)], thumb: thumbAcross },
+                X: { fingers: [{x1:base.index.x,y1:base.index.y,x2:60,y2:65,color:'#8b5cf6'}, curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbAcross },
+                Y: { fingers: [curled(base.index), curled(base.middle), curled(base.ring), up(base.pinky,5)], thumb: thumbUp },
+                Z: { fingers: [up(base.index), curled(base.middle), curled(base.ring), curled(base.pinky)], thumb: thumbAcross }
+            };
+
+            return configs[letter] || configs['A'];
+        }
+
+        // Initialize first letter
+        selectLetter('A');
+
+        // ===========================
+        // Phrases Tab
+        // ===========================
+        PHRASES.forEach((p, i) => {
+            const item = document.createElement('div');
+            item.className = 'phrase-item';
+            item.innerHTML = `
+                <div class="phrase-word">${p.word}</div>
+                <div class="phrase-spelling">${p.word.split('').join(' - ')}</div>
+                <div class="phrase-desc">${p.desc}</div>
+            `;
+            item.addEventListener('click', () => startWordPractice(p.word, item));
+            phraseList.appendChild(item);
+        });
+
+        function startWordPractice(word, el) {
+            document.querySelectorAll('.phrase-item').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+
+            wordTarget = word;
+            wordIndex = 0;
+            wordPracticeActive = true;
+            wordPracticeCard.style.display = 'block';
+            wordResultMsg.className = 'result-msg';
+            wordResultMsg.textContent = '';
+            updateWordDisplay();
+        }
+
+        function updateWordDisplay() {
+            if (wordIndex >= wordTarget.length) {
+                wordTargetLetter.textContent = '!!!';
+                wordResultMsg.className = 'result-msg success';
+                wordResultMsg.textContent = `You spelled "${wordTarget}"! Great job!`;
+                wordPracticeActive = false;
+                return;
+            }
+
+            wordTargetLetter.textContent = wordTarget[wordIndex];
+
+            let html = '';
+            for (let i = 0; i < wordTarget.length; i++) {
+                if (i < wordIndex) html += `<span class="done">${wordTarget[i]}</span>`;
+                else if (i === wordIndex) html += `<span class="current">${wordTarget[i]}</span>`;
+                else html += `<span class="pending">${wordTarget[i]}</span>`;
+            }
+            wordProgress.innerHTML = html;
+        }
+
+        wordCancelBtn.addEventListener('click', () => {
+            wordPracticeActive = false;
+            wordPracticeCard.style.display = 'none';
+            document.querySelectorAll('.phrase-item').forEach(p => p.classList.remove('active'));
+        });
+
+        // ===========================
+        // Practice Tab
+        // ===========================
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        startPracticeBtn.addEventListener('click', () => {
+            practiceLetters = shuffleArray(alphabet);
+            practiceIndex = 0;
+            practiceCorrect = 0;
+            practiceSkipped = 0;
+            practiceStreak = 0;
+            practiceActive = true;
+            resultMsg.className = 'result-msg';
+            resultMsg.textContent = '';
+            startPracticeBtn.textContent = 'Restart';
+            updatePractice();
+        });
+
+        skipBtn.addEventListener('click', () => {
+            if (!practiceActive) return;
+            practiceSkipped++;
+            practiceStreak = 0;
+            practiceIndex++;
+            resultMsg.className = 'result-msg';
+            if (practiceIndex >= practiceLetters.length) {
+                finishPractice();
+            } else {
+                updatePractice();
+            }
+        });
+
+        function updatePractice() {
+            targetLetter.textContent = practiceLetters[practiceIndex];
+            progressFill.style.width = `${(practiceIndex / practiceLetters.length) * 100}%`;
+            progressText.textContent = `${practiceIndex} / ${practiceLetters.length}`;
+            statCorrect.textContent = practiceCorrect;
+            statSkipped.textContent = practiceSkipped;
+            statStreak.textContent = practiceStreak;
+        }
+
+        function onPracticeMatch(letter) {
+            if (!practiceActive) return;
+            if (letter === practiceLetters[practiceIndex]) {
+                practiceCorrect++;
+                practiceStreak++;
+                resultMsg.className = 'result-msg success';
+                resultMsg.textContent = `Correct! "${letter}" matched!`;
+                practiceIndex++;
+                if (practiceIndex >= practiceLetters.length) {
+                    finishPractice();
+                } else {
+                    setTimeout(() => {
+                        resultMsg.className = 'result-msg';
+                        updatePractice();
+                    }, 800);
+                }
+            }
+        }
+
+        function finishPractice() {
+            practiceActive = false;
+            targetLetter.textContent = '!';
+            progressFill.style.width = '100%';
+            progressText.textContent = `${practiceLetters.length} / ${practiceLetters.length}`;
+            resultMsg.className = 'result-msg success';
+            resultMsg.textContent = `Done! ${practiceCorrect} correct, ${practiceSkipped} skipped. Best streak: ${practiceStreak}`;
+            startPracticeBtn.textContent = 'Play Again';
+            statCorrect.textContent = practiceCorrect;
+            statSkipped.textContent = practiceSkipped;
+        }
+
+        // ===========================
+        // Gesture Classification (same as before)
+        // ===========================
+        function classifyGesture(landmarks) {
+            const fingerStates = getFingerStates(landmarks);
+            const thumbState = getThumbState(landmarks);
+            const [indexUp, middleUp, ringUp, pinkyUp] = fingerStates;
+            const thumbUp = thumbState;
+
+            const thumbTip = landmarks[4]; const indexTip = landmarks[8];
+            const middleTip = landmarks[12]; const pinkyTip = landmarks[20];
+            const wrist = landmarks[0]; const indexMcp = landmarks[5];
+            const middleMcp = landmarks[9]; const indexPip = landmarks[6];
+            const indexDip = landmarks[7]; const thumbMcp = landmarks[2];
+
+            const d = dist;
+            const thumbIndexDist = d(thumbTip, indexTip);
+            const thumbMiddleDist = d(thumbTip, middleTip);
+            const indexMiddleDist = d(indexTip, middleTip);
+            const palmSize = d(wrist, middleMcp);
+            const nThumbIndex = thumbIndexDist / palmSize;
+            const nThumbMiddle = thumbMiddleDist / palmSize;
+            const nIndexMiddle = indexMiddleDist / palmSize;
+
+            if (!indexUp && !middleUp && !ringUp && !pinkyUp && thumbUp) return { letter: 'A', confidence: 85 };
+            if (indexUp && middleUp && ringUp && pinkyUp && !thumbUp && nIndexMiddle < 0.15) return { letter: 'B', confidence: 85 };
+
+            if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbUp) {
+                const curveCheck = landmarks[8].y < landmarks[6].y && landmarks[8].y > landmarks[5].y;
+                if (curveCheck && nThumbIndex > 0.3 && nThumbIndex < 0.7) return { letter: 'C', confidence: 70 };
+            }
+
+            if (indexUp && !middleUp && !ringUp && !pinkyUp && nThumbMiddle < 0.2) return { letter: 'D', confidence: 80 };
+            if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbUp && nThumbIndex < 0.25) return { letter: 'E', confidence: 65 };
+            if (!indexUp && middleUp && ringUp && pinkyUp && nThumbIndex < 0.15) return { letter: 'F', confidence: 80 };
+
+            if (indexUp && !middleUp && !ringUp && !pinkyUp) {
+                const indexH = Math.abs(indexTip.x - indexMcp.x) > Math.abs(indexTip.y - indexMcp.y);
+                if (indexH && thumbUp) return { letter: 'G', confidence: 75 };
+            }
+
+            if (indexUp && middleUp && !ringUp && !pinkyUp) {
+                const indexH = Math.abs(indexTip.x - indexMcp.x) > Math.abs(indexTip.y - indexMcp.y);
+                if (indexH) return { letter: 'H', confidence: 75 };
+            }
+
+            if (!indexUp && !middleUp && !ringUp && pinkyUp && !thumbUp) return { letter: 'I', confidence: 85 };
+
+            if (indexUp && middleUp && !ringUp && !pinkyUp && nIndexMiddle > 0.15 && thumbUp) return { letter: 'K', confidence: 75 };
+
+            if (indexUp && !middleUp && !ringUp && !pinkyUp && thumbUp) {
+                const angle = angleBetween(thumbTip, thumbMcp, indexTip);
+                if (angle > 60 && angle < 120) return { letter: 'L', confidence: 85 };
+            }
+
+            if (!indexUp && !middleUp && !ringUp && !pinkyUp && nThumbIndex < 0.15 && nThumbMiddle < 0.2) return { letter: 'O', confidence: 70 };
+            if (indexUp && middleUp && !ringUp && !pinkyUp && nIndexMiddle < 0.08) return { letter: 'R', confidence: 75 };
+            if (indexUp && middleUp && !ringUp && !pinkyUp && nIndexMiddle < 0.15 && nIndexMiddle >= 0.08) return { letter: 'U', confidence: 80 };
+            if (indexUp && middleUp && !ringUp && !pinkyUp && !thumbUp && nIndexMiddle > 0.15) return { letter: 'V', confidence: 85 };
+            if (indexUp && middleUp && ringUp && !pinkyUp && !thumbUp) return { letter: 'W', confidence: 80 };
+
+            if (!middleUp && !ringUp && !pinkyUp) {
+                const indexHooked = indexDip.y < indexTip.y && indexPip.y > indexDip.y;
+                if (indexHooked && !thumbUp) return { letter: 'X', confidence: 70 };
+            }
+
+            if (!indexUp && !middleUp && !ringUp && pinkyUp && thumbUp) return { letter: 'Y', confidence: 85 };
+
+            if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbUp) {
+                if (nThumbIndex > 0.05 && nThumbIndex < 0.3 && thumbTip.y > indexPip.y) return { letter: 'S', confidence: 70 };
+            }
+
+            if (indexUp && middleUp && ringUp && pinkyUp && thumbUp) return { letter: '5', confidence: 80 };
+            if (indexUp && !middleUp && !ringUp && !pinkyUp) return { letter: 'D', confidence: 60 };
+
+            return null;
+        }
+
+        function getFingerStates(lm) {
+            return [lm[8].y < lm[6].y, lm[12].y < lm[10].y, lm[16].y < lm[14].y, lm[20].y < lm[18].y];
+        }
+
+        function getThumbState(lm) {
+            return Math.abs(lm[4].x - lm[3].x) > 0.04 || lm[4].y < lm[3].y;
+        }
+
+        function dist(a, b) { return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2); }
+
+        function angleBetween(a, vertex, b) {
+            const v1 = { x: a.x - vertex.x, y: a.y - vertex.y };
+            const v2 = { x: b.x - vertex.x, y: b.y - vertex.y };
+            const dot = v1.x * v2.x + v1.y * v2.y;
+            const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
+            const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
+            return Math.acos(Math.max(-1, Math.min(1, dot / (mag1 * mag2)))) * (180 / Math.PI);
+        }
+
+        // ===========================
+        // MediaPipe + Camera
+        // ===========================
+        function onResults(results) {
+            overlayCanvas.width = video.videoWidth;
+            overlayCanvas.height = video.videoHeight;
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            if (cooldown > 0) cooldown--;
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                drawConnectors(ctx, landmarks, HAND_CONNECTIONS, { color: '#8b5cf6', lineWidth: 3 });
+                drawLandmarks(ctx, landmarks, { color: '#06b6d4', lineWidth: 1, radius: 4 });
+
+                const result = classifyGesture(landmarks);
+                if (result && cooldown <= 0) {
+                    detectionBar.style.display = 'flex';
+                    currentLetterEl.textContent = result.letter;
+                    confidenceEl.textContent = result.confidence + '%';
+                    currentDetectedLetter = result.letter;
+
+                    // Highlight in letter grid
+                    document.querySelectorAll('.letter-cell').forEach(el => el.classList.remove('detected'));
+                    const idx = alphabet.indexOf(result.letter);
+                    if (idx >= 0) letterGrid.children[idx].classList.add('detected');
+
+                    if (result.letter === lastDetected) {
+                        detectCount++;
+                        if (detectCount >= CONFIRM_FRAMES) {
+                            addLetter(result.letter);
+
+                            // Practice mode check
+                            onPracticeMatch(result.letter);
+
+                            // Word practice check
+                            if (wordPracticeActive && result.letter === wordTarget[wordIndex]) {
+                                wordIndex++;
+                                updateWordDisplay();
+                            }
+
+                            detectCount = 0;
+                            cooldown = 10;
+                        }
+                    } else {
+                        lastDetected = result.letter;
+                        detectCount = 1;
+                    }
+                    const progress = Math.min(detectCount / CONFIRM_FRAMES, 1);
+                    currentLetterEl.style.opacity = 0.5 + progress * 0.5;
+                } else if (!result) {
+                    detectionBar.style.display = 'flex';
+                    currentLetterEl.textContent = '?';
+                    confidenceEl.textContent = '-';
+                    currentDetectedLetter = null;
+                    lastDetected = '';
+                    detectCount = 0;
+                }
+            } else {
+                detectionBar.style.display = 'none';
+                currentDetectedLetter = null;
+                lastDetected = '';
+                detectCount = 0;
+                document.querySelectorAll('.letter-cell').forEach(el => el.classList.remove('detected'));
+            }
+        }
+
+        function addLetter(letter) {
+            builtText += letter;
+            updateTextDisplay();
+        }
+
+        function updateTextDisplay() {
+            translatedText.innerHTML = builtText.length > 0
+                ? builtText + '<span class="cursor-blink">|</span>'
+                : '<span class="cursor-blink">|</span>';
+        }
+
+        clearBtn.addEventListener('click', () => { builtText = ''; updateTextDisplay(); });
+        spaceBtn.addEventListener('click', () => { builtText += ' '; updateTextDisplay(); });
+        backspaceBtn.addEventListener('click', () => { builtText = builtText.slice(0, -1); updateTextDisplay(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ') { e.preventDefault(); builtText += ' '; updateTextDisplay(); }
+            if (e.key === 'Backspace') { e.preventDefault(); builtText = builtText.slice(0, -1); updateTextDisplay(); }
+            if (e.key === 'Escape') { builtText = ''; updateTextDisplay(); }
+        });
+
+        startBtn.addEventListener('click', async () => {
+            if (isRunning) { stopCamera(); return; }
+            try {
+                setStatus('loading', 'Starting camera and loading hand tracking...');
+                loadingScreen.classList.remove('hidden');
+
+                hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}` });
+                hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
+                hands.onResults(onResults);
+
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } } });
+                video.srcObject = stream;
+                await video.play();
+
+                camera = new Camera(video, { onFrame: async () => { await hands.send({ image: video }); }, width: 1280, height: 960 });
+                await camera.start();
+
+                loadingScreen.classList.add('hidden');
+                isRunning = true;
+                startBtn.textContent = 'Stop Camera';
+                setStatus('active', 'Hand tracking active — show ASL signs to your camera');
+            } catch (err) {
+                loadingScreen.classList.add('hidden');
+                setStatus('error', 'Error: ' + err.message);
+            }
+        });
+
+        function stopCamera() {
+            if (camera) { camera.stop(); camera = null; }
+            if (video.srcObject) { video.srcObject.getTracks().forEach(t => t.stop()); video.srcObject = null; }
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            detectionBar.style.display = 'none';
+            isRunning = false;
+            startBtn.textContent = 'Start Camera';
+            setStatus('', 'Camera stopped');
+        }
+
+        function setStatus(type, msg) {
+            statusDot.className = `status-dot ${type}`;
+            statusText.textContent = msg;
+        }
+    })();
+    </script>
+</body>
+</html>
